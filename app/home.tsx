@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Pressable, Text, View} from 'react-native';
 import {Link} from "expo-router";
-import BottomBar from "../components/common/BottomBar";
+import { ActivityIndicator, MD2Colors } from 'react-native-paper';
 
 const MyComponent = () => {
     return (
@@ -15,6 +15,7 @@ const MyComponent = () => {
                 <Text className={``}>
                     Click
                 </Text>
+                <ActivityIndicator animating={true} color={MD2Colors.red800} />
             </View>
         </View>
     );
