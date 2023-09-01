@@ -5,8 +5,8 @@ import {Link} from "expo-router";
 
 const MyComponent = () => {
     return (
-        <Text>
-aasdadasds
+        <Text className={`text-5xl`}>
+            aasdadasds
             <Link href="/">home</Link>
 
         </Text>
