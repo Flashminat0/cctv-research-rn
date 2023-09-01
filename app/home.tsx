@@ -23,18 +23,25 @@ const RecentsRoute = () => <Text>Recents</Text>;
 const NotificationsRoute = () => <Text>Notifications</Text>;
 
 const MyComponent = () => {
+    const [haveNotifications, setHaveNotifications] = useState(false);
+
 
     const [index, setIndex] = useState(0);
     const [routes] = useState([
-        { key: 'music', title: 'Favorites', focusedIcon: 'heart', unfocusedIcon: 'heart-outline'},
-        { key: 'albums', title: 'Albums', focusedIcon: 'album' },
-        { key: 'recents', title: 'Recents', focusedIcon: 'history' },
-        { key: 'notifications', title: 'Notifications', focusedIcon: 'bell', unfocusedIcon: 'bell-outline' },
+        {key: 'account', title: 'Account', focusedIcon: 'account-settings', unfocusedIcon: 'account'},
+        {key: 'scan', title: 'Scan', focusedIcon: 'camera', unfocusedIcon: 'cctv'},
+        {key: 'recents', title: 'Recents', focusedIcon: 'history'},
+        {
+            key: 'notifications',
+            title: 'Notifications',
+            focusedIcon: 'bell',
+            unfocusedIcon: haveNotifications ? 'bell-badge-outline' : 'bell-outline'
+        },
     ]);
 
     const renderScene = BottomNavigation.SceneMap({
-        music: MusicRoute,
-        albums: AlbumsRoute,
+        account: MusicRoute,
+        scan: AlbumsRoute,
         recents: RecentsRoute,
         notifications: NotificationsRoute,
     });
@@ -42,7 +49,7 @@ const MyComponent = () => {
     return (
         <View className={'h-[104vh]'}>
             <BottomNavigation
-                navigationState={{ index, routes }}
+                navigationState={{index, routes}}
                 onIndexChange={setIndex}
                 renderScene={renderScene}
             />
