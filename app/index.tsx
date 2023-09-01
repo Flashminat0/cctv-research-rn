@@ -5,7 +5,7 @@ import {ActivityIndicator, MD2Colors} from "react-native-paper";
 import React from "react";
 
 export default function Page() {
-    return <View className={`pt-10`}>
+    return <View className={``}>
         <Link
             className={`p-4 text-6xl`}
             href="/home">About</Link>

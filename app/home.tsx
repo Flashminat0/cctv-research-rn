@@ -1,8 +1,9 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {Pressable, Text, View} from 'react-native';
 import {Link} from "expo-router";
 import {ActivityIndicator, BottomNavigation, MD2Colors} from 'react-native-paper';
+import Scanner from "./Scanner";
 
 const MusicRoute = () => <View>
     <Text className={`text-5xl`}>
@@ -21,13 +22,15 @@ const AlbumsRoute = () => <Text>Albums</Text>;
 const RecentsRoute = () => <Text>Recents</Text>;
 
 const NotificationsRoute = () => <Text>Notifications</Text>;
+const TrackerRoute = () => <Text>Notifications</Text>;
 
 const MyComponent = () => {
     const [haveNotifications, setHaveNotifications] = useState(false);
+    const [trackerActive, setTrackerActive] = useState(false);
 
 
     const [index, setIndex] = useState(0);
-    const [routes] = useState([
+    const [routes, setRoutes] = useState([
         {key: 'account', title: 'Account', focusedIcon: 'account-settings', unfocusedIcon: 'account'},
         {key: 'scan', title: 'Scan', focusedIcon: 'camera', unfocusedIcon: 'cctv'},
         {key: 'recents', title: 'Recents', focusedIcon: 'history'},
@@ -39,11 +42,44 @@ const MyComponent = () => {
         },
     ]);
 
+    useEffect(() => {
+        let routesWithoutTracker = [
+            {key: 'account', title: 'Account', focusedIcon: 'account-settings', unfocusedIcon: 'account'},
+            {key: 'scan', title: 'Scan', focusedIcon: 'camera', unfocusedIcon: 'camera'},
+            {key: 'recents', title: 'Recents', focusedIcon: 'history'},
+            {
+                key: 'notifications',
+                title: 'Notifications',
+                focusedIcon: 'bell',
+                unfocusedIcon: haveNotifications ? 'bell-badge-outline' : 'bell-outline'
+            },
+        ]
+
+        let routesWithTracker = [
+            {key: 'account', title: 'Account', focusedIcon: 'account-settings', unfocusedIcon: 'account'},
+            {key: 'tracker', title: 'Tracker', focusedIcon: 'cctv', unfocusedIcon: 'cctv'},
+            {
+                key: 'notifications',
+                title: 'Notifications',
+                focusedIcon: 'bell',
+                unfocusedIcon: haveNotifications ? 'bell-badge-outline' : 'bell-outline'
+            },
+        ]
+
+        if (trackerActive) {
+            setRoutes(routesWithTracker)
+        } else {
+            setRoutes(routesWithoutTracker)
+        }
+
+    }, [trackerActive]);
+
     const renderScene = BottomNavigation.SceneMap({
         account: MusicRoute,
-        scan: AlbumsRoute,
+        scan: Scanner,
         recents: RecentsRoute,
         notifications: NotificationsRoute,
+        tracker: TrackerRoute
     });
 
     return (
@@ -52,6 +88,7 @@ const MyComponent = () => {
                 navigationState={{index, routes}}
                 onIndexChange={setIndex}
                 renderScene={renderScene}
+                shifting={true}
             />
         </View>
     );
