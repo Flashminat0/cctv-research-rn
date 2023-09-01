@@ -8,7 +8,7 @@ export default function Page() {
     return <View className={``}>
         <Link
             className={`p-4 text-6xl`}
-            href="/home">About</Link>
+            href="/router">About</Link>
 
         <ActivityIndicator animating={true} color={MD2Colors.red800} />
 

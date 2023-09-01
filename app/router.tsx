@@ -1,9 +1,22 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
-import {Pressable, Text, View} from 'react-native';
+import {Platform, Pressable, Text, View} from 'react-native';
 import {Link} from "expo-router";
 import {ActivityIndicator, BottomNavigation, MD2Colors} from 'react-native-paper';
 import Scanner from "./Scanner";
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import Constants from "expo-constants";
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+    }),
+});
+
+
 
 const MusicRoute = () => <View>
     <Text className={`text-5xl`}>
@@ -24,7 +37,37 @@ const RecentsRoute = () => <Text>Recents</Text>;
 const NotificationsRoute = () => <Text>Notifications</Text>;
 const TrackerRoute = () => <Text>Notifications</Text>;
 
-const MyComponent = () => {
+const Router = () => {
+    const [expoPushToken, setExpoPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
+    useEffect(() => {
+        // @ts-ignore
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+        // @ts-ignore
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            // @ts-ignore
+            setNotification(notification);
+        });
+
+        // @ts-ignore
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            // @ts-ignore
+            console.log(response);
+        });
+
+        return () => {
+            // @ts-ignore
+            Notifications.removeNotificationSubscription(notificationListener.current);
+            // @ts-ignore
+            Notifications.removeNotificationSubscription(responseListener.current);
+        };
+    }, []);
+
+
+
     const [haveNotifications, setHaveNotifications] = useState(false);
     const [trackerActive, setTrackerActive] = useState(false);
 
@@ -94,4 +137,40 @@ const MyComponent = () => {
     );
 };
 
-export default MyComponent;
+export default Router;
+
+
+
+async function registerForPushNotificationsAsync() {
+    let token;
+    if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+        }
+        token = await Notifications.getExpoPushTokenAsync({
+            // @ts-ignore
+            projectId: 'ede988a4-b1c6-4871-ada0-f2644d41604b',
+        });
+        console.log(token);
+    } else {
+        alert('Must use physical device for Push Notifications');
+    }
+
+    if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
+    }
+
+    return token;
+}
