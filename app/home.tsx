@@ -1,15 +1,22 @@
 import React from 'react';
 
-import {Text, View} from 'react-native';
+import {Pressable, Text, View} from 'react-native';
 import {Link} from "expo-router";
+import BottomBar from "../components/common/BottomBar";
 
 const MyComponent = () => {
     return (
-        <Text className={`text-5xl`}>
-            aasdadasds
-            <Link href="/">home</Link>
-
-        </Text>
+        <View>
+            <Text className={`text-5xl`}>
+                aasdadasds
+            </Text>
+            <View className={`bg-green-700`}>
+                <Link href="/">home</Link>
+                <Text className={``}>
+                    Click
+                </Text>
+            </View>
+        </View>
     );
 };
 
