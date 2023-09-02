@@ -4,15 +4,16 @@ import {useState} from 'react';
 import {StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewProps, ViewStyle} from 'react-native';
 import {Button, IconButton, MD2Colors, MD3Colors} from "react-native-paper";
 import {Avatar, Card,} from 'react-native-paper';
-import {IconSource} from 'react-native-paper/lib/typescript/components/Icon';
-import {ThemeProp} from 'react-native-paper/lib/typescript/types';
 
 const ScannerPage = () => {
+    const [capturing, setCapturing] = useState(false);
     const [pictureTaken, setPictureTaken] = useState(false)
     const [pictureURI, setPictureURI] = useState("")
 
     const [type, setType] = useState(CameraType.back);
     const [permission, requestPermission] = Camera.useCameraPermissions();
+
+    const [findingLaptop, setFindingLaptop] = useState(false)
 
     function toggleCameraType() {
         setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
@@ -49,12 +50,14 @@ const ScannerPage = () => {
 
     let camera: Camera
     const TakePicture = async () => {
+        setCapturing(true)
         if (camera) {
             camera.takePictureAsync({base64: true}).then((data) => {
                 // data.base64 = data.base64?.replace("data:image/jpeg;base64,", "")
 
                 setPictureURI(data.uri)
                 setPictureTaken(true)
+                setCapturing(false)
 
             })
         }
@@ -66,7 +69,7 @@ const ScannerPage = () => {
     }
 
     const onPictureConfirm = () => {
-
+        setFindingLaptop(true)
     }
 
     if (pictureTaken) {
@@ -89,7 +92,9 @@ const ScannerPage = () => {
                     <View className={`px-3`}>
                         <Card.Actions>
                             <Button onPress={onPictureRetake}>Cancel</Button>
-                            <Button>Ok</Button>
+                            <Button
+                                loading={findingLaptop}
+                                onPress={onPictureConfirm}>Ok</Button>
                         </Card.Actions>
                     </View>
                 </Card>
@@ -106,6 +111,7 @@ const ScannerPage = () => {
                     <View
                         className={`flex self-end flex-row justify-between items-center px-10 py-10 mt-[80vh] space-x-6`}>
                         <Button
+                            loading={capturing}
                             className={`flex flex-row justify-between items-center px-4`}
                             buttonColor={MD2Colors.grey700}
                             textColor={MD2Colors.white}
