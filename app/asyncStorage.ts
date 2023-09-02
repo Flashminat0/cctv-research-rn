@@ -1,29 +1,30 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const storeData = async (value: { email: string }) => {
+export const storeData = async (key: string, value: string) => {
     try {
         const jsonValue = JSON.stringify(value);
-        await AsyncStorage.setItem('data', jsonValue);
+        await AsyncStorage.setItem(key, jsonValue);
     } catch (e) {
-        // saving error
+        console.error("Error saving data:", e);
     }
 };
-export const getData = async () => {
+
+export const getData = async (key: string) => {
     try {
-        const jsonValue = await AsyncStorage.getItem('data');
-        return jsonValue != null ? JSON.parse(jsonValue) : null;
+        const jsonValue = await AsyncStorage.getItem(key);
+        const parsedValue = jsonValue != null ? JSON.parse(jsonValue) : null;
+        return typeof parsedValue === 'string' ? parsedValue : null;
     } catch (e) {
-        // error reading value
+        console.error("Error reading data:", e);
         return null;
     }
 };
 
-export const removeData = async () => {
+export const removeData = async (key: string) => {
     try {
-        await AsyncStorage.removeItem('data')
+        await AsyncStorage.removeItem(key);
+        console.log(`Removed data for key: ${key}`);
     } catch (e) {
-        // remove error
+        console.error("Error removing data:", e);
     }
-
-    console.log('Done.')
-}
+};

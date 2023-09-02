@@ -2,7 +2,7 @@ import React from 'react';
 
 import {Text, View} from 'react-native';
 
-const Scanner = () => {
+const ScannerPage = () => {
     return (
         <View className={`pt-10 `}>
             <Text className={`text-white`}>
@@ -12,4 +12,4 @@ const Scanner = () => {
     );
 };
 
-export default Scanner;
+export default ScannerPage;

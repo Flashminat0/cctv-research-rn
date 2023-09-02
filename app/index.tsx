@@ -13,8 +13,8 @@ export default function Page() {
     const [loggedInEmail, setLoggedInEmail] = useState<string | null>(null);
 
     useEffect(() => {
-        getData().then((value) => {
-            setLoggedInEmail(value?.email);
+        getData('email').then((value) => {
+            setLoggedInEmail(value);
             setLoading(false);
         })
     }, []);
@@ -70,9 +70,7 @@ export default function Page() {
                 setLoginSuccess(true);
                 console.log(user);
 
-                storeData({
-                    email: email,
-                }).then(() => {
+                storeData('email', email).then(() => {
                     setLoginSuccess(true);
 
                     setTimeout(() => {
@@ -123,9 +121,7 @@ export default function Page() {
 
                             // ...
 
-                            storeData({
-                                email: email,
-                            }).then(() => {
+                            storeData('email', email).then(() => {
                                 setLoginSuccess(true);
 
                                 setTimeout(() => {

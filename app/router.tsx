@@ -3,10 +3,14 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Platform, Pressable, Text, View} from 'react-native';
 import {Link} from "expo-router";
 import {ActivityIndicator, BottomNavigation, MD2Colors} from 'react-native-paper';
-import Scanner from "./Scanner";
+import ScannerPage from "./tabs/ScannerPage";
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from "expo-constants";
+import firebase from "firebase/compat";
+import User = firebase.User;
+import {getData, storeData} from "./asyncStorage";
+import ProfilePage from "./tabs/profile";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -16,7 +20,6 @@ Notifications.setNotificationHandler({
         priority: Notifications.AndroidNotificationPriority.HIGH,
     }),
 });
-
 
 
 const MusicRoute = () => <View>
@@ -66,7 +69,6 @@ const Router = () => {
             Notifications.removeNotificationSubscription(responseListener.current);
         };
     }, []);
-
 
 
     const [haveNotifications, setHaveNotifications] = useState(false);
@@ -119,12 +121,20 @@ const Router = () => {
     }, [trackerActive]);
 
     const renderScene = BottomNavigation.SceneMap({
-        account: MusicRoute,
-        scan: Scanner,
+        account: ProfilePage,
+        scan: ScannerPage,
         recents: RecentsRoute,
         notifications: NotificationsRoute,
         tracker: TrackerRoute
     });
+
+    useEffect(() => {
+        if (expoPushToken) {
+            storeData('expoPushToken', expoPushToken).then(() => {
+
+            });
+        }
+    }, [expoPushToken]);
 
     return (
         <View className={'h-[104vh]'}>
@@ -141,14 +151,13 @@ const Router = () => {
 export default Router;
 
 
-
 async function registerForPushNotificationsAsync() {
     let token;
     if (Device.isDevice) {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        const {status: existingStatus} = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
         if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
+            const {status} = await Notifications.requestPermissionsAsync();
             finalStatus = status;
         }
         if (finalStatus !== 'granted') {
