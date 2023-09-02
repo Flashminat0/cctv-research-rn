@@ -4,9 +4,11 @@ import {Text, View} from 'react-native';
 
 const ProfilePage = () => {
     return (
-        <Text>
-asdasdasd
-        </Text>
+        <View className={`pt-10 `}>
+            <Text className={`text-white`}>
+                asdasdasd
+            </Text>
+        </View>
     );
 };
 

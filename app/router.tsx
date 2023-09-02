@@ -3,14 +3,12 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Platform, Pressable, Text, View} from 'react-native';
 import {Link} from "expo-router";
 import {ActivityIndicator, BottomNavigation, MD2Colors} from 'react-native-paper';
-import ScannerPage from "./tabs/ScannerPage";
+import ProfilePage from "./tabs/ProfilePage";
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-import Constants from "expo-constants";
-import firebase from "firebase/compat";
-import User = firebase.User;
+
 import {getData, storeData} from "./asyncStorage";
-import ProfilePage from "./tabs/profile";
+import ScannerPage from "./tabs/ScannerPage";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
