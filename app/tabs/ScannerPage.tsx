@@ -4,8 +4,15 @@ import {useState} from 'react';
 import {StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewProps, ViewStyle} from 'react-native';
 import {Button, IconButton, MD2Colors, MD3Colors} from "react-native-paper";
 import {Avatar, Card,} from 'react-native-paper';
+import {useAppDispatch, useAppSelector} from "../../features/redux";
+import {setLaptop} from "../../features/laptopSlice";
+import {getData} from "../asyncStorage";
 
 const ScannerPage = () => {
+    const dispatch = useAppDispatch();
+    const laptop = useAppSelector(state => state.laptop);
+
+
     const [capturing, setCapturing] = useState(false);
     const [pictureTaken, setPictureTaken] = useState(false)
     const [pictureURI, setPictureURI] = useState("")
@@ -58,6 +65,14 @@ const ScannerPage = () => {
                 setPictureURI(data.uri)
                 setPictureTaken(true)
                 setCapturing(false)
+
+                getData("email").then((email) => {
+                    dispatch(setLaptop({
+                        isLaptop: true,
+                        imageBase64: data.base64 || "",
+                        boundUserEmail: email || ""
+                    }))
+                })
 
             })
         }

@@ -9,6 +9,7 @@ import * as Notifications from 'expo-notifications';
 
 import {getData, storeData} from "./asyncStorage";
 import ScannerPage from "./tabs/ScannerPage";
+import {useAppDispatch, useAppSelector} from "../features/redux";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -40,6 +41,15 @@ const NotificationsRoute = () => <Text>Notifications</Text>;
 const TrackerRoute = () => <Text>Notifications</Text>;
 
 const Router = () => {
+    const dispatch = useAppDispatch();
+    const laptop = useAppSelector(state => state.laptop);
+
+    useEffect(() => {
+        if (laptop.isLaptop) {
+            setTrackerActive(true);
+        }
+    }, [laptop]);
+
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState(false);
     const notificationListener = useRef();

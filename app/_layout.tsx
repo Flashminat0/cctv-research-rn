@@ -3,6 +3,8 @@ import {Slot} from "expo-router";
 import "../global.css";
 import {StatusBar} from "expo-status-bar";
 import {MD3DarkTheme as DefaultTheme, PaperProvider} from 'react-native-paper';
+import store from "../features/store";
+import {Provider} from "react-redux";
 
 const theme = {
     ...DefaultTheme,
@@ -15,8 +17,12 @@ const theme = {
 
 
 export default function () {
-    return <PaperProvider theme={theme}>
-        <StatusBar style="dark"/>
-        <Slot/>
-    </PaperProvider>;
+    return (
+        <Provider store={store}>
+            <PaperProvider theme={theme}>
+                <StatusBar style="dark"/>
+                <Slot/>
+            </PaperProvider>
+        </Provider>
+    );
 }
