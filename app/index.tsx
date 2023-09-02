@@ -14,7 +14,7 @@ export default function Page() {
 
     useEffect(() => {
         getData().then((value) => {
-            setLoggedInEmail(value);
+            setLoggedInEmail(value?.email);
             setLoading(false);
         })
     }, []);
@@ -23,11 +23,10 @@ export default function Page() {
         console.log(loggedInEmail);
 
         if (loggedInEmail) {
-            router.replace('/home');
+            router.replace('/router');
         }
 
-    }, []);
-    //loading, loggedInEmail
+    }, [loading, loggedInEmail]);
 
 
     const [email, setEmail] = useState<string>('');
@@ -70,6 +69,17 @@ export default function Page() {
                 // ...
                 setLoginSuccess(true);
                 console.log(user);
+
+                storeData({
+                    email: email,
+                }).then(() => {
+                    setLoginSuccess(true);
+
+                    setTimeout(() => {
+                        router.replace('/router');
+                    }, 2000);
+                });
+
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -112,6 +122,16 @@ export default function Page() {
                             console.log(user);
 
                             // ...
+
+                            storeData({
+                                email: email,
+                            }).then(() => {
+                                setLoginSuccess(true);
+
+                                setTimeout(() => {
+                                    router.replace('/router');
+                                }, 2000);
+                            });
                         })
                         .catch((error) => {
                             const errorCode = error.code;
