@@ -7,7 +7,8 @@ export const trackerSlice = createSlice({
         found: false,
         tracking: false,
         problem: false,
-        problemMessage: ""
+        problemMessage: "",
+        cctvImageURL: ""
     },
     reducers: {
         setTracker: (state, action) => {
@@ -16,6 +17,7 @@ export const trackerSlice = createSlice({
             state.tracking = action.payload.tracking;
             state.problem = action.payload.problem;
             state.problemMessage = action.payload.problemMessage;
+            state.cctvImageURL = action.payload.cctvImageURL;
         },
         clearTracker: (state) => {
             state.active = false;
@@ -23,6 +25,7 @@ export const trackerSlice = createSlice({
             state.tracking = false;
             state.problem = false;
             state.problemMessage = "";
+            state.cctvImageURL = "";
         }
     }
 })

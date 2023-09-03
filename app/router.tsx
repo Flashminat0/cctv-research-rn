@@ -49,7 +49,8 @@ const Router = () => {
             found: false,
             tracking: false,
             problem: false,
-            problemMessage: ""
+            problemMessage: "",
+            cctvImageURL: ""
         }))
 
     }

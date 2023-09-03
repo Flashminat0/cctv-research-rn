@@ -6,7 +6,7 @@ import {database} from "../../firebase";
 import {getData} from "../asyncStorage";
 import {ref as databaseRef, set, onValue, get, child} from 'firebase/database';
 import {jobData, UserData} from "./ScannerPage";
-import {Avatar, Button, Card} from "react-native-paper";
+import {Avatar, Button, Card, IconButton, MD3Colors} from "react-native-paper";
 import {clearLaptop, setLaptop} from "../../features/laptopSlice";
 import {useAppDispatch} from "../../features/redux";
 import {clearTracker} from "../../features/trackerSlice";
@@ -50,6 +50,7 @@ const TrackerPage = () => {
     useEffect(() => {
         if (currentJobTimestamp > 0 && userEmail.length > 0 && userEmail !== 'ERR@') {
             checkForStatusChangeOnJob(currentJobTimestamp)
+
         }
     }, [currentJobTimestamp]);
 
@@ -57,6 +58,12 @@ const TrackerPage = () => {
         dispatch(clearLaptop())
         dispatch(clearTracker())
     }
+
+    useEffect(() => {
+        if (currentJobStatus) {
+            setupJob()
+        }
+    }, [currentJobStatus]);
 
     const setupJob = () => {
         set(databaseRef(database, `jobs/${userEmail?.split('@')[0]}/`), {
@@ -70,6 +77,7 @@ const TrackerPage = () => {
             tracking: false,
             problem: false,
             problemMessage: "",
+            cctvImageURL: "",
 
             // active status
             active: true,
@@ -81,9 +89,8 @@ const TrackerPage = () => {
             <View className={`flex flex-col justify-center items-center h-screen w-screen`}>
                 <Card className={`w-[90vw] py-1`}>
                     <Card.Title
-                        title="Laptop"
+                        title="Confirm Laptop"
                         left={(props) => <Avatar.Icon {...props} icon="laptop"/>}
-
                     />
                     <Card.Content>
                         <Text className={`text-white mb-2`}>
@@ -109,12 +116,25 @@ const TrackerPage = () => {
                         </View>
                     </View>
                     <View className={`px-3`}>
-                        <Card.Actions>
-                            <Button onPress={resetJob}>No Try Again</Button>
-                            <Button
-                                loading={false}
-                                onPress={() => {
-                                }}>Yes</Button>
+                        <Card.Actions className={`flex flex-row w-full justify-between`}>
+                            <IconButton
+                                icon="help"
+                                iconColor={MD3Colors.error50}
+                                size={20}
+                                onPress={() => console.log('Pressed')}
+                            />
+                            <View className={'grow flex flex-row justify-end'}>
+                                <View className={`flex flex-row space-x-2 items-center`}>
+                                    <Button
+                                        mode={'outlined'}
+                                        onPress={resetJob}>No Try Again</Button>
+                                    <Button
+                                        mode={'contained'}
+                                        loading={false}
+                                        onPress={() => {
+                                        }}>Yes</Button>
+                                </View>
+                            </View>
                         </Card.Actions>
                     </View>
                 </Card>

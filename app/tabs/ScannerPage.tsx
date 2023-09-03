@@ -184,7 +184,8 @@ const ScannerPage = () => {
                         found: false,
                         tracking: false,
                         problem: false,
-                        problemMessage: ""
+                        problemMessage: "",
+                        cctvImageURL: ""
                     }))
                 })
 
@@ -246,7 +247,7 @@ const ScannerPage = () => {
                         <IconButton
                             mode="contained"
                             style={styles.button}
-                            icon="camera"
+                            icon="camera-flip-outline"
                             iconColor={MD2Colors.white}
                             containerColor={MD2Colors.grey700}
                             size={25}
