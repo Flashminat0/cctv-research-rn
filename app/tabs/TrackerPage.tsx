@@ -6,7 +6,7 @@ import {database} from "../../firebase";
 import {getData} from "../asyncStorage";
 import {ref as databaseRef, set, onValue, get, child} from 'firebase/database';
 import {jobData, UserData} from "./ScannerPage";
-import {Avatar, Button, Card, IconButton, MD3Colors, Tooltip, Modal, Portal} from "react-native-paper";
+import {Avatar, Button, Card, IconButton, MD3Colors, Tooltip, Modal, Portal, MD2Colors} from "react-native-paper";
 import {clearLaptop, setLaptop} from "../../features/laptopSlice";
 import {useAppDispatch, useAppSelector} from "../../features/redux";
 import {clearTracker} from "../../features/trackerSlice";
@@ -150,6 +150,7 @@ const TrackerPage = () => {
                                 source={{uri: cctvImage}}/>
                             {showLoading && <View className={`px-1 pt-1`}>
                                 <Progress.Bar
+                                    color={MD2Colors.grey700}
                                     width={320}
                                     useNativeDriver={true}
                                     animationConfig={{bounciness: 1}}
