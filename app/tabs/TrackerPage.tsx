@@ -6,7 +6,7 @@ import {database} from "../../firebase";
 import {getData} from "../asyncStorage";
 import {ref as databaseRef, set, onValue, get, child} from 'firebase/database';
 import {jobData, UserData} from "./ScannerPage";
-import {Avatar, Button, Card, IconButton, MD3Colors} from "react-native-paper";
+import {Avatar, Button, Card, IconButton, MD3Colors, Tooltip, Modal, Portal} from "react-native-paper";
 import {clearLaptop, setLaptop} from "../../features/laptopSlice";
 import {useAppDispatch, useAppSelector} from "../../features/redux";
 import {clearTracker} from "../../features/trackerSlice";
@@ -109,9 +109,18 @@ const TrackerPage = () => {
         })
     }
 
+    const [showHelp, setShowHelp] = useState<boolean>(false);
+    const containerStyle = {backgroundColor: 'white', padding: 20 , margin: 20};
 
     return (
         <View>
+            <Portal>
+                <Modal visible={showHelp} onDismiss={() => {
+                    setShowHelp(false)
+                }} contentContainerStyle={containerStyle}>
+                    <Text>Add Help here //Todo.</Text>
+                </Modal>
+            </Portal>
             <View className={`flex flex-col justify-center items-center h-screen w-screen`}>
                 <Card className={`w-[90vw] py-1`}>
                     <Card.Title
@@ -154,12 +163,14 @@ const TrackerPage = () => {
                     </View>
                     <View className={`px-3`}>
                         <Card.Actions className={`flex flex-row w-full justify-between`}>
-                            <IconButton
-                                icon="help"
-                                iconColor={MD3Colors.error50}
-                                size={20}
-                                onPress={() => console.log('Pressed')}
-                            />
+                            <Tooltip title="Help">
+                                <IconButton
+                                    icon="help"
+                                    iconColor={MD3Colors.error50}
+                                    size={20}
+                                    onPress={() => setShowHelp(true)}
+                                />
+                            </Tooltip>
                             <View className={'grow flex flex-row justify-end'}>
                                 <View className={`flex flex-row space-x-2 items-center`}>
                                     <Button
