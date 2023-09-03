@@ -14,10 +14,9 @@ import {database} from "../../firebase";
 const ProfilePage = () => {
     const dispatch = useAppDispatch();
     const logout = async () => {
-        await clearAll();
+        getData("email").then(async (email) => {
 
-        getData("email").then((email) => {
-
+            await clearAll();
             const trackerRef = databaseRef(database)
             get(child(trackerRef, `trackers/`)).then((snapshot) => {
                 const data: string[] = snapshot.val();
@@ -26,13 +25,15 @@ const ProfilePage = () => {
                     const arrayWithoutUser = data.filter((value) => value !== `${email?.split('@')[0]}`)
                     set(databaseRef(database, `trackers/`), arrayWithoutUser)
                 }
+            }).then(() => {
+                dispatch(clearLaptop())
+                dispatch(clearTracker())
+
+                router.replace('/');
+
             })
         })
 
-        dispatch(clearLaptop())
-        dispatch(clearTracker())
-
-        router.replace('/');
 
     }
 

@@ -132,6 +132,9 @@ const TrackerPage = () => {
             active: true,
         })
 
+    }
+
+    const setupTrackerInDB = () => {
         const trackerRef = databaseRef(database)
 
         let trackingUsers: string[] = []
@@ -159,9 +162,13 @@ const TrackerPage = () => {
                 set(databaseRef(database, `trackers/`), trackingUsers)
             }
         })
-
-
     }
+
+    useEffect(() => {
+        if (tracker.active) {
+            setupTrackerInDB()
+        }
+    }, [tracker]);
 
     const [showHelp, setShowHelp] = useState<boolean>(false);
     const containerStyle = {backgroundColor: 'white', padding: 20, margin: 20};
