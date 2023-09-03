@@ -25,15 +25,14 @@ const TrackerPage = () => {
     useEffect(() => {
         if (tracker.found) {
             setShowLoading(false)
-        }
-
-        if (tracker.tracking) {
+        } else if (tracker.tracking) {
             setShowLoading(false)
-        }
-
-        if (tracker.problem) {
+        } else if (tracker.problem) {
             setShowLoading(false)
             setCctvImage(failedImage)
+        } else {
+            setShowLoading(true)
+            setCctvImage(searchingImage)
         }
     }, [tracker]);
 
@@ -110,7 +109,7 @@ const TrackerPage = () => {
     }
 
     const [showHelp, setShowHelp] = useState<boolean>(false);
-    const containerStyle = {backgroundColor: 'white', padding: 20 , margin: 20};
+    const containerStyle = {backgroundColor: 'white', padding: 20, margin: 20};
 
     return (
         <View>
