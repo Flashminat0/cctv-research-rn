@@ -6,13 +6,25 @@ import {useAppDispatch, useAppSelector} from "../../features/redux";
 import {setLaptop} from "../../features/laptopSlice";
 import {getData, storeData} from "../asyncStorage";
 import {database, storage} from "../../firebase";
-import {getDownloadURL, ref as storageRef, uploadBytes} from 'firebase/storage';
-import {ref as databaseRef, set , onValue } from 'firebase/database';
+import {getDownloadURL, ref as storageRef, uploadBytes,} from 'firebase/storage';
+import {ref as databaseRef, set, onValue, get, child} from 'firebase/database';
 import {decode} from 'base-64';
 
 
 if (typeof atob === 'undefined') {
     global.atob = decode;
+}
+
+interface jobData {
+    id: string,
+    image_of_laptop: string,
+    timestamp: number,
+}
+
+interface UserData {
+    expoToken: string,
+    email: string,
+    jobs: jobData[]
 }
 
 const ScannerPage = () => {
@@ -112,36 +124,59 @@ const ScannerPage = () => {
     }
 
     const uploadDataToFirebase = (url: string, timestamp: number, userEmail: string | null) => {
-        const userRef = databaseRef(database, `${userEmail?.split('@')[0]}/`)
+        let userData: UserData
+        const userRef = databaseRef(database)
 
-        onValue(userRef, (snapshot) => {
-            const data = snapshot.val();
+        get(child(userRef, `${userEmail?.split('@')[0]}/`)).then(async (snapshot) => {
+            const data: UserData = snapshot.val();
 
-            console.log(data)
+            if (data) {
+                userData = {
+                    expoToken: await getData("expoPushToken") || "",
+                    email: await getData("email") || "",
+                    jobs: [
+                        ...data.jobs,
+                        {
+                            id: data.jobs.length.toString(),
+                            image_of_laptop: url,
+                            timestamp: timestamp
+                        }
+                    ]
+                }
+            } else {
+                userData = {
+                    expoToken: await getData("expoPushToken") || "",
+                    email: await getData("email") || "",
+                    jobs: [
+                        {
+                            id: "0",
+                            image_of_laptop: url,
+                            timestamp: timestamp
+                        }
+                    ]
+                }
+            }
+
+
+            set(databaseRef(database, `${userEmail?.split('@')[0]}/`), userData).then(r => {
+                getData("email").then(async (email) => {
+                    await storeData('isLaptop', 'true')
+                    await storeData('imageBase64', pictureURI)
+                    await storeData('boundUserEmail', email || "")
+                    await storeData('timestamp', timestamp.toString())
+
+                    dispatch(setLaptop({
+                        isLaptop: true,
+                        imageBase64: pictureURI,
+                        boundUserEmail: email || "",
+                        timestamp: timestamp
+                    }))
+                })
+
+            });
         });
 
 
-
-
-        set(databaseRef(database, `${userEmail?.split('@')[0]}/`), {
-            expoToken: "",
-            email: userEmail,
-            image_of_laptop: url,
-            timestamp: timestamp,
-        }).then(r => {
-            getData("email").then(async (email) => {
-                await storeData('isLaptop', 'true')
-                await storeData('imageBase64', pictureURI)
-                await storeData('boundUserEmail', email || "")
-
-                dispatch(setLaptop({
-                    isLaptop: true,
-                    imageBase64: pictureURI,
-                    boundUserEmail: email || ""
-                }))
-            })
-
-        });
     };
 
     if (pictureTaken) {

@@ -49,11 +49,13 @@ const Router = () => {
         const isLaptop = await getData('isLaptop');
         const imageBase64 = await getData('imageBase64');
         const boundUserEmail = await getData('boundUserEmail');
+        const timestamp = await getData('timestamp');
 
         dispatch(setLaptop({
             isLaptop: !!isLaptop,
             imageBase64: imageBase64,
-            boundUserEmail: boundUserEmail
+            boundUserEmail: boundUserEmail,
+            timestamp: timestamp
         }))
 
     }
@@ -75,7 +77,7 @@ const Router = () => {
     const responseListener = useRef();
     useEffect(() => {
         // @ts-ignore
-        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token.data));
 
         // @ts-ignore
         notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
@@ -195,7 +197,7 @@ async function registerForPushNotificationsAsync() {
             // @ts-ignore
             projectId: 'ede988a4-b1c6-4871-ada0-f2644d41604b',
         });
-        console.log(token);
+        // console.log(token);
     } else {
         alert('Must use physical device for Push Notifications');
     }
