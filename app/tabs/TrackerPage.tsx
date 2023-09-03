@@ -9,7 +9,7 @@ import {jobData, UserData} from "./ScannerPage";
 import {Avatar, Button, Card, IconButton, MD3Colors, Tooltip, Modal, Portal, MD2Colors} from "react-native-paper";
 import {clearLaptop, setLaptop} from "../../features/laptopSlice";
 import {useAppDispatch, useAppSelector} from "../../features/redux";
-import {clearTracker} from "../../features/trackerSlice";
+import {clearTracker, setTracker} from "../../features/trackerSlice";
 import * as Progress from 'react-native-progress';
 
 const TrackerPage = () => {
@@ -81,6 +81,22 @@ const TrackerPage = () => {
     const resetJob = () => {
         dispatch(clearLaptop())
         dispatch(clearTracker())
+
+        const trackerRef = databaseRef(database)
+
+        get(child(trackerRef, `trackers/`)).then((snapshot) => {
+            const data: string[] = snapshot.val();
+
+            if (data) {
+                const arrayWithoutUser = data.filter((value) => value !== `${userEmail?.split('@')[0]}`)
+
+                console.log(arrayWithoutUser)
+
+                set(databaseRef(database, `trackers/`), arrayWithoutUser)
+            }
+        })
+
+
     }
 
     useEffect(() => {
@@ -90,6 +106,18 @@ const TrackerPage = () => {
     }, [currentJobStatus]);
 
     const setupJob = () => {
+        dispatch(setTracker({
+            // tracking details
+            found: false,
+            tracking: false,
+            problem: false,
+            problemMessage: "",
+            cctvImageURL: "",
+
+            // active status
+            active: true,
+        }))
+
         set(databaseRef(database, `jobs/${userEmail?.split('@')[0]}/`), {
             // basic details
             laptopImage: currentJobStatus?.image_of_laptop || "",
@@ -106,6 +134,36 @@ const TrackerPage = () => {
             // active status
             active: true,
         })
+
+        const trackerRef = databaseRef(database)
+
+        let trackingUsers: string[] = []
+        let isInArray = false;
+        get(child(trackerRef, `trackers/`)).then((snapshot) => {
+            const data: string[] = snapshot.val();
+
+            if (tracker.active) {
+                if (data) {
+                    isInArray = data.includes(`${userEmail?.split('@')[0]}`)
+
+                    if (isInArray) {
+                        trackingUsers = data
+
+                    } else {
+                        trackingUsers = [
+                            ...data,
+                            `${userEmail?.split('@')[0]}`
+                        ]
+                    }
+
+                } else {
+                    trackingUsers = [`${userEmail?.split('@')[0]}`]
+                }
+                set(databaseRef(database, `trackers/`), trackingUsers)
+            }
+        })
+
+
     }
 
     const [showHelp, setShowHelp] = useState<boolean>(false);
@@ -187,9 +245,6 @@ const TrackerPage = () => {
                     </View>
                 </Card>
             </View>
-            <Text className={`pt-10 text-white`}>
-                {JSON.stringify(currentJobStatus)}
-            </Text>
         </View>
     );
 };
