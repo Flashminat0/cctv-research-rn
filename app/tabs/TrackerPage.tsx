@@ -53,7 +53,7 @@ const TrackerPage = () => {
                 if (currentJob) {
                     setCurrentJobStatus(currentJob)
 
-                    console.log(currentJob)
+                   // console.log(currentJob)
                 }
             }
         })
@@ -89,9 +89,6 @@ const TrackerPage = () => {
 
             if (data) {
                 const arrayWithoutUser = data.filter((value) => value !== `${userEmail?.split('@')[0]}`)
-
-                console.log(arrayWithoutUser)
-
                 set(databaseRef(database, `trackers/`), arrayWithoutUser)
             }
         })
