@@ -12,6 +12,7 @@ import ScannerPage from "./tabs/ScannerPage";
 import {useAppDispatch, useAppSelector} from "../features/redux";
 import {setLaptop} from "../features/laptopSlice";
 import TrackerPage from "./tabs/TrackerPage";
+import {setTracker} from "../features/trackerSlice";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -23,24 +24,8 @@ Notifications.setNotificationHandler({
 });
 
 
-const MusicRoute = () => <View>
-    <Text className={`text-5xl`}>
-        aasdadasds
-    </Text>
-    <View className={`bg-green-700`}>
-        <Link href="/">home</Link>
-        <Text className={``}>
-            Click
-        </Text>
-    </View>
-</View>;
-
-const AlbumsRoute = () => <Text>Albums</Text>;
-
 const RecentsRoute = () => <Text>Recents</Text>;
-
 const NotificationsRoute = () => <Text>Notifications</Text>;
-const TrackerRoute = () => <Text>Notifications</Text>;
 
 const Router = () => {
     const dispatch = useAppDispatch();
@@ -59,6 +44,14 @@ const Router = () => {
             timestamp: timestamp
         }))
 
+        dispatch(setTracker({
+            active: false,
+            found: false,
+            tracking: false,
+            problem: false,
+            problemMessage: ""
+        }))
+
     }
 
 
@@ -69,6 +62,8 @@ const Router = () => {
     useEffect(() => {
         if (laptop.isLaptop) {
             setTrackerActive(true);
+        } else {
+            setTrackerActive(false);
         }
     }, [laptop]);
 
@@ -89,7 +84,7 @@ const Router = () => {
         // @ts-ignore
         responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
             // @ts-ignore
-            console.log(response);
+            // console.log(response);
         });
 
         return () => {

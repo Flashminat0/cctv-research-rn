@@ -22,7 +22,7 @@ export default function Page() {
     }, []);
 
     useEffect(() => {
-        console.log(loggedInEmail);
+        // console.log(loggedInEmail);
 
         if (loggedInEmail) {
             router.replace('/router');
@@ -70,7 +70,7 @@ export default function Page() {
                 const user = userCredential.user;
                 // ...
                 setLoginSuccess(true);
-                console.log(user);
+                // console.log(user);
 
                 storeData('email', email).then(() => {
                     setLoginSuccess(true);
@@ -119,7 +119,7 @@ export default function Page() {
                             setErrorText('');
 
                             setLoginSuccess(true);
-                            console.log(user);
+                            // console.log(user);
 
                             // ...
 

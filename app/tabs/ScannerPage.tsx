@@ -9,23 +9,25 @@ import {database, storage} from "../../firebase";
 import {getDownloadURL, ref as storageRef, uploadBytes,} from 'firebase/storage';
 import {ref as databaseRef, set, onValue, get, child} from 'firebase/database';
 import {decode} from 'base-64';
+import {setTracker} from "../../features/trackerSlice";
 
 
 if (typeof atob === 'undefined') {
     global.atob = decode;
 }
 
-interface jobData {
+export interface jobData {
     id: string,
     image_of_laptop: string,
     timestamp: number,
 }
 
-interface UserData {
+export interface UserData {
     expoToken: string,
     email: string,
     jobs: jobData[]
-    notifications :[]
+    notifications: []
+    currentJobTimestamp: number
 }
 
 const ScannerPage = () => {
@@ -143,7 +145,8 @@ const ScannerPage = () => {
                             timestamp: timestamp
                         }
                     ],
-                    notifications: data.notifications || []
+                    notifications: data.notifications || [],
+                    currentJobTimestamp: timestamp
                 }
             } else {
                 userData = {
@@ -156,7 +159,8 @@ const ScannerPage = () => {
                             timestamp: timestamp
                         }
                     ],
-                    notifications: []
+                    notifications: [],
+                    currentJobTimestamp: timestamp
                 }
             }
 
@@ -173,6 +177,14 @@ const ScannerPage = () => {
                         imageBase64: pictureURI,
                         boundUserEmail: email || "",
                         timestamp: timestamp
+                    }))
+
+                    dispatch(setTracker({
+                        active: false,
+                        found: false,
+                        tracking: false,
+                        problem: false,
+                        problemMessage: ""
                     }))
                 })
 
