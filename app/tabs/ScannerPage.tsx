@@ -25,6 +25,7 @@ interface UserData {
     expoToken: string,
     email: string,
     jobs: jobData[]
+    notifications :[]
 }
 
 const ScannerPage = () => {
@@ -127,7 +128,7 @@ const ScannerPage = () => {
         let userData: UserData
         const userRef = databaseRef(database)
 
-        get(child(userRef, `${userEmail?.split('@')[0]}/`)).then(async (snapshot) => {
+        get(child(userRef, `users/${userEmail?.split('@')[0]}/`)).then(async (snapshot) => {
             const data: UserData = snapshot.val();
 
             if (data) {
@@ -141,7 +142,8 @@ const ScannerPage = () => {
                             image_of_laptop: url,
                             timestamp: timestamp
                         }
-                    ]
+                    ],
+                    notifications: data.notifications || []
                 }
             } else {
                 userData = {
@@ -153,12 +155,13 @@ const ScannerPage = () => {
                             image_of_laptop: url,
                             timestamp: timestamp
                         }
-                    ]
+                    ],
+                    notifications: []
                 }
             }
 
 
-            set(databaseRef(database, `${userEmail?.split('@')[0]}/`), userData).then(r => {
+            set(databaseRef(database, `users/${userEmail?.split('@')[0]}/`), userData).then(r => {
                 getData("email").then(async (email) => {
                     await storeData('isLaptop', 'true')
                     await storeData('imageBase64', pictureURI)

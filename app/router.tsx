@@ -11,6 +11,7 @@ import {getData, storeData} from "./asyncStorage";
 import ScannerPage from "./tabs/ScannerPage";
 import {useAppDispatch, useAppSelector} from "../features/redux";
 import {setLaptop} from "../features/laptopSlice";
+import TrackerPage from "./tabs/TrackerPage";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -154,7 +155,7 @@ const Router = () => {
         scan: ScannerPage,
         recents: RecentsRoute,
         notifications: NotificationsRoute,
-        tracker: TrackerRoute
+        tracker: TrackerPage
     });
 
     useEffect(() => {

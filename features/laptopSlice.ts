@@ -9,18 +9,6 @@ export const laptopSlice = createSlice({
         timestamp: 0
     },
     reducers: {
-        setImageBase64: (state, action) => {
-            state.imageBase64 = action.payload;
-        },
-        setBoundUserEmail: (state, action) => {
-            state.boundUserEmail = action.payload;
-        },
-        setIsLaptop: (state, action) => {
-            state.isLaptop = action.payload;
-        },
-        setTimestamp: (state, action) => {
-            state.timestamp = action.payload;
-        },
         setLaptop: (state, action) => {
             state.isLaptop = action.payload.isLaptop;
             state.imageBase64 = action.payload.imageBase64;
@@ -36,6 +24,9 @@ export const laptopSlice = createSlice({
     }
 })
 
-export const {setImageBase64, clearLaptop, setBoundUserEmail, setLaptop, setIsLaptop} = laptopSlice.actions;
+export const {
+    clearLaptop,
+    setLaptop
+} = laptopSlice.actions;
 
 export default laptopSlice.reducer;
