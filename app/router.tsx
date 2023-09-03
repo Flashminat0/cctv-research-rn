@@ -6,10 +6,11 @@ import {ActivityIndicator, BottomNavigation, MD2Colors} from 'react-native-paper
 import ProfilePage from "./tabs/ProfilePage";
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
-
+import {ref as databaseRef, set} from 'firebase/database';
 import {getData, storeData} from "./asyncStorage";
 import ScannerPage from "./tabs/ScannerPage";
 import {useAppDispatch, useAppSelector} from "../features/redux";
+import {setLaptop} from "../features/laptopSlice";
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -43,6 +44,24 @@ const TrackerRoute = () => <Text>Notifications</Text>;
 const Router = () => {
     const dispatch = useAppDispatch();
     const laptop = useAppSelector(state => state.laptop);
+
+    const checkForPresistance = async () => {
+        const isLaptop = await getData('isLaptop');
+        const imageBase64 = await getData('imageBase64');
+        const boundUserEmail = await getData('boundUserEmail');
+
+        dispatch(setLaptop({
+            isLaptop: !!isLaptop,
+            imageBase64: imageBase64,
+            boundUserEmail: boundUserEmail
+        }))
+
+    }
+
+
+    useEffect(() => {
+        checkForPresistance()
+    }, []);
 
     useEffect(() => {
         if (laptop.isLaptop) {
@@ -83,7 +102,7 @@ const Router = () => {
     const [trackerActive, setTrackerActive] = useState(false);
 
 
-    const [index, setIndex] = useState(0);
+    const [index, setIndex] = useState(1);
     const [routes, setRoutes] = useState([
         {key: 'account', title: 'Account', focusedIcon: 'account-settings', unfocusedIcon: 'account'},
         {key: 'scan', title: 'Scan', focusedIcon: 'camera', unfocusedIcon: 'cctv'},

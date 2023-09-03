@@ -21,10 +21,15 @@ export const laptopSlice = createSlice({
             state.isLaptop = action.payload.isLaptop;
             state.imageBase64 = action.payload.imageBase64;
             state.boundUserEmail = action.payload.boundUserEmail;
+        },
+        clearLaptop: (state) => {
+            state.isLaptop = false;
+            state.imageBase64 = "";
+            state.boundUserEmail = "";
         }
     }
 })
 
-export const {setImageBase64, setBoundUserEmail, setLaptop , setIsLaptop} = laptopSlice.actions;
+export const {setImageBase64, clearLaptop, setBoundUserEmail, setLaptop, setIsLaptop} = laptopSlice.actions;
 
 export default laptopSlice.reducer;

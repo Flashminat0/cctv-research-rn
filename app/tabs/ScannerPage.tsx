@@ -1,16 +1,15 @@
-import React from 'react';
-import {Camera, CameraType, ImageType} from 'expo-camera';
-import {useState} from 'react';
-import {StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewProps, ViewStyle} from 'react-native';
-import {Button, IconButton, MD2Colors, MD3Colors} from "react-native-paper";
-import {Avatar, Card,} from 'react-native-paper';
+import React, {useState} from 'react';
+import {Camera, CameraType} from 'expo-camera';
+import {StyleSheet, Text, View} from 'react-native';
+import {Avatar, Button, Card, IconButton, MD2Colors} from "react-native-paper";
 import {useAppDispatch, useAppSelector} from "../../features/redux";
 import {setLaptop} from "../../features/laptopSlice";
-import {getData} from "../asyncStorage";
+import {getData, storeData} from "../asyncStorage";
 import {database, storage} from "../../firebase";
-import {getDownloadURL, getStorage, ref as storageRef, uploadString, uploadBytes} from 'firebase/storage';
-import {getDatabase, ref as databaseRef, set} from 'firebase/database';
+import {getDownloadURL, ref as storageRef, uploadBytes} from 'firebase/storage';
+import {ref as databaseRef, set , onValue } from 'firebase/database';
 import {decode} from 'base-64';
+
 
 if (typeof atob === 'undefined') {
     global.atob = decode;
@@ -20,11 +19,9 @@ const ScannerPage = () => {
     const dispatch = useAppDispatch();
     const laptop = useAppSelector(state => state.laptop);
 
-
     const [capturing, setCapturing] = useState(false);
     const [pictureTaken, setPictureTaken] = useState(false)
     const [pictureURI, setPictureURI] = useState("")
-    const [base64, setBase64] = useState("")
 
     const [type, setType] = useState(CameraType.back);
     const [permission, requestPermission] = Camera.useCameraPermissions();
@@ -72,23 +69,9 @@ const ScannerPage = () => {
                 base64: true,
                 quality: 0.7,
             }).then((data) => {
-
-
-                if (data.base64 === data.uri) {
-                    console.log("base64 and uri are the same")
-                }
-
-                const firebaseNeededPrefix = "data:image/jpg;base64,"
-                data.base64 = firebaseNeededPrefix + data.base64
-
-
-                setBase64(data.base64)
-
                 setPictureURI(data.uri)
                 setPictureTaken(true)
                 setCapturing(false)
-
-
             })
         }
     }
@@ -100,7 +83,6 @@ const ScannerPage = () => {
 
     const onPictureConfirm = async () => {
         setFindingLaptop(true)
-
 
         const blob: Blob = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
@@ -130,13 +112,28 @@ const ScannerPage = () => {
     }
 
     const uploadDataToFirebase = (url: string, timestamp: number, userEmail: string | null) => {
+        const userRef = databaseRef(database, `${userEmail?.split('@')[0]}/`)
 
-        set(databaseRef(database, `${userEmail?.split('@')[0]}/${timestamp}/`), {
+        onValue(userRef, (snapshot) => {
+            const data = snapshot.val();
+
+            console.log(data)
+        });
+
+
+
+
+        set(databaseRef(database, `${userEmail?.split('@')[0]}/`), {
+            expoToken: "",
             email: userEmail,
             image_of_laptop: url,
             timestamp: timestamp,
         }).then(r => {
-            getData("email").then((email) => {
+            getData("email").then(async (email) => {
+                await storeData('isLaptop', 'true')
+                await storeData('imageBase64', pictureURI)
+                await storeData('boundUserEmail', email || "")
+
                 dispatch(setLaptop({
                     isLaptop: true,
                     imageBase64: pictureURI,
