@@ -5,7 +5,9 @@ import {ActivityIndicator, MD2Colors, TextInput, Button, Snackbar} from "react-n
 import React, {useEffect, useState} from "react";
 import {storeData, getData, removeData} from "./asyncStorage";
 import {router} from 'expo-router';
-import {auth} from "../firebase";
+import {
+    auth
+} from "../firebase";
 import {getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword} from "firebase/auth";
 
 export default function Page() {
