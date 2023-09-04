@@ -186,10 +186,8 @@ const TrackerPage = () => {
             onValue(jobRef, (snapshot) => {
                 const data = snapshot.val();
 
-                console.log(data);
 
                 if (data.found) {
-                    console.log('found')
 
                     dispatch(setTracker(data))
 
