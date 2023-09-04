@@ -4,10 +4,10 @@ import {Text, View} from 'react-native';
 
 import {database} from "../../firebase";
 import {getData} from "../asyncStorage";
-import {ref as databaseRef, set, onValue, get, child} from 'firebase/database';
+import {child, get, onValue, ref as databaseRef, set} from 'firebase/database';
 import {jobData, UserData} from "./ScannerPage";
-import {Avatar, Button, Card, IconButton, MD3Colors, Tooltip, Modal, Portal, MD2Colors} from "react-native-paper";
-import {clearLaptop, setLaptop} from "../../features/laptopSlice";
+import {Avatar, Button, Card, IconButton, MD2Colors, MD3Colors, Modal, Portal, Tooltip} from "react-native-paper";
+import {clearLaptop} from "../../features/laptopSlice";
 import {useAppDispatch, useAppSelector} from "../../features/redux";
 import {clearTracker, setTracker} from "../../features/trackerSlice";
 import * as Progress from 'react-native-progress';
@@ -53,7 +53,7 @@ const TrackerPage = () => {
                 if (currentJob) {
                     setCurrentJobStatus(currentJob)
 
-                   // console.log(currentJob)
+                    // console.log(currentJob)
                 }
             }
         })
@@ -162,24 +162,56 @@ const TrackerPage = () => {
                 set(databaseRef(database, `trackers/`), trackingUsers)
             }
         })
+
+
     }
 
     useEffect(() => {
-        if (tracker.active) {
+        if ((tracker.active && userEmail !== 'ERR@') && !tracker.found) {
             setupTrackerInDB()
         }
     }, [tracker]);
 
     const [showHelp, setShowHelp] = useState<boolean>(false);
     const containerStyle = {backgroundColor: 'white', padding: 20, margin: 20};
+    //
+    // const checkForChangesInTracker = () => {
+
+    // }
+    //
+    useEffect(() => {
+        if (userEmail !== 'ERR@') {
+            const jobRef = databaseRef(database, `jobs/${userEmail?.split('@')[0]}/`)
+
+            onValue(jobRef, (snapshot) => {
+                const data = snapshot.val();
+
+                console.log(data);
+
+                if (data.found) {
+                    console.log('found')
+
+                    dispatch(setTracker(data))
+
+                    setCctvImage(data.cctvImageURL || searchingImage)
+                    setShowLoading(false)
+                }
+
+            })
+        }
+    }, [userEmail]);
+
 
     return (
         <View>
             <Portal>
-                <Modal visible={showHelp} onDismiss={() => {
+                <Modal
+                    theme={{colors: {primary: MD3Colors.error50}}}
+                    visible={showHelp} onDismiss={() => {
                     setShowHelp(false)
                 }} contentContainerStyle={containerStyle}>
-                    <Text>Add Help here //Todo.</Text>
+                    <Text>Make sure that your laptop screen is on and the browser page should be on
+                        laptop-app-cctv.vercel.app</Text>
                 </Modal>
             </Portal>
             <View className={`flex flex-col justify-center items-center h-screen w-screen`}>
@@ -207,8 +239,12 @@ const TrackerPage = () => {
                             CCTV image of laptop
                         </Text>
                         <View className={`mx-5 my-1 mb-4`}>
-                            <Card.Cover
-                                source={{uri: cctvImage}}/>
+                            {tracker.found ? <>
+                                <Card.Cover
+                                    source={{uri: tracker.cctvImageURL}}/></> : <>
+                                <Card.Cover
+                                    source={{uri: cctvImage}}/>
+                            </>}
                             {showLoading && <View className={`px-1 pt-1`}>
                                 <Progress.Bar
                                     color={MD2Colors.grey700}
