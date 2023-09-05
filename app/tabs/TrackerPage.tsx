@@ -15,6 +15,9 @@ import * as Progress from 'react-native-progress';
 const TrackerPage = () => {
     const dispatch = useAppDispatch();
     const tracker = useAppSelector(state => state.tracker);
+    const laptop = useAppSelector(state => state.laptop);
+
+    const [donePhase, setDonePhase] = useState<boolean>(false);
 
     const failedImage = 'https://firebasestorage.googleapis.com/v0/b/research-cctv.appspot.com/o/failed.png?alt=media&token=90c50d27-cca4-4a83-891a-d78d5651d413'
     const searchingImage = 'https://firebasestorage.googleapis.com/v0/b/research-cctv.appspot.com/o/searching.png?alt=media&token=e40a434d-76e9-4706-b1d1-b595f46e8b19'
@@ -30,6 +33,9 @@ const TrackerPage = () => {
         } else if (tracker.problem) {
             setShowLoading(false)
             setCctvImage(failedImage)
+        } else if (!tracker.found) {
+            setShowLoading(true)
+            setCctvImage(searchingImage)
         } else {
             setShowLoading(true)
             setCctvImage(searchingImage)
@@ -72,7 +78,7 @@ const TrackerPage = () => {
 
 
     useEffect(() => {
-        if (currentJobTimestamp > 0 && userEmail.length > 0 && userEmail !== 'ERR@') {
+        if (currentJobTimestamp > 0 && userEmail.length > 0 && userEmail !== 'ERR@' && !donePhase) {
             checkForStatusChangeOnJob(currentJobTimestamp)
 
         }
@@ -81,26 +87,53 @@ const TrackerPage = () => {
     const resetJob = () => {
         dispatch(clearLaptop())
         dispatch(clearTracker())
+        setCctvImage(searchingImage)
+        setShowLoading(true)
 
         const trackerRef = databaseRef(database)
 
-        get(child(trackerRef, `trackers/`)).then((snapshot) => {
-            const data: string[] = snapshot.val();
+        get(child(trackerRef, `trackers/`))
+            .then(async (snapshot) => {
+                const data: string[] = snapshot.val();
 
-            if (data) {
-                const arrayWithoutUser = data.filter((value) => value !== `${userEmail?.split('@')[0]}`)
-                set(databaseRef(database, `trackers/`), arrayWithoutUser)
-            }
+                if (data) {
+                    const arrayWithoutUser = data.filter((value) => value !== `${userEmail?.split('@')[0]}`)
+                    // console.log(arrayWithoutUser)
+
+                    await set(databaseRef(database, `trackers/`), arrayWithoutUser)
+                }
+            })
+            .then(async () => {
+                if (userEmail !== 'ERR@') {
+                    await set(databaseRef(database, `jobs/${userEmail?.split('@')[0]}`), {
+                        // basic details
+                        laptopImage: "",
+                        timestamp: "",
+                        userEmail: "",
+
+                        // tracking details
+                        found: false,
+                        tracking: false,
+                        problem: false,
+                        problemMessage: "",
+                        cctvImageURL: "",
+
+                        // active status
+                        active: false,
+                    })
+                }
+            }).then(() => {
+            setDonePhase(false)
         })
 
 
     }
 
     useEffect(() => {
-        if (currentJobStatus) {
+        if (currentJobStatus && !tracker.found && !tracker.problem && !donePhase) {
             setupJob()
         }
-    }, [currentJobStatus]);
+    }, [currentJobStatus, tracker]);
 
     const setupJob = () => {
         dispatch(setTracker({
@@ -159,7 +192,10 @@ const TrackerPage = () => {
                 } else {
                     trackingUsers = [`${userEmail?.split('@')[0]}`]
                 }
-                set(databaseRef(database, `trackers/`), trackingUsers)
+
+                if (!tracker.problem && !tracker.found && !tracker.tracking && tracker.active) {
+                    set(databaseRef(database, `trackers/`), trackingUsers)
+                }
             }
         })
 
@@ -167,10 +203,13 @@ const TrackerPage = () => {
     }
 
     useEffect(() => {
-        if ((tracker.active && userEmail !== 'ERR@') && !tracker.found) {
+        // console.log(tracker)
+
+        if ((((tracker.active && userEmail !== 'ERR@') && !tracker.found) && showLoading) && !donePhase) {
+            // console.log('setting up tracker')
             setupTrackerInDB()
         }
-    }, [tracker]);
+    }, [tracker, laptop, showLoading]);
 
     const [showHelp, setShowHelp] = useState<boolean>(false);
     const containerStyle = {backgroundColor: 'white', padding: 20, margin: 20};
@@ -187,12 +226,20 @@ const TrackerPage = () => {
                 const data = snapshot.val();
 
 
-                if (data.found) {
+                dispatch(setTracker(data))
 
-                    dispatch(setTracker(data))
+                if (data.found) {
 
                     setCctvImage(data.cctvImageURL || searchingImage)
                     setShowLoading(false)
+                    setDonePhase(true)
+                }
+
+                if (data.problem) {
+
+                    setCctvImage(failedImage)
+                    setShowLoading(false)
+                    setDonePhase(true)
                 }
 
             })
