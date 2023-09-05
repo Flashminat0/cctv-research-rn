@@ -12,6 +12,21 @@ import {useAppDispatch, useAppSelector} from "../../features/redux";
 import {clearTracker, setTracker} from "../../features/trackerSlice";
 import * as Progress from 'react-native-progress';
 
+interface ICoordinates {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+}
+
+interface IBindResponse {
+    laptop_image_path: string;
+    similarity_score: number;
+    coordinates: ICoordinates;
+    status: string;
+}
+
+
 const TrackerPage = () => {
     const dispatch = useAppDispatch();
     const tracker = useAppSelector(state => state.tracker);
@@ -122,9 +137,13 @@ const TrackerPage = () => {
                         active: false,
                     })
                 }
-            }).then(() => {
-            setDonePhase(false)
-        })
+            })
+            .then(() => {
+                set(databaseRef(database, `cctv/${userEmail?.split('@')[0]}`), null)
+            })
+            .then(() => {
+                setDonePhase(false)
+            })
 
 
     }
@@ -247,6 +266,25 @@ const TrackerPage = () => {
     }, [userEmail]);
 
 
+    const handleStartTracking = () => {
+        const userID = `${userEmail?.split('@')[0]}`
+        console.log('tracking started')
+
+        const cctvRef = databaseRef(database)
+        get(child(cctvRef, `cctv/${userID}`)).then((snapshot) => {
+            const data: IBindResponse = snapshot.val()
+
+            const newDataWIthTracker = {
+                ...data,
+                status: 'tracking',
+            }
+
+            set(databaseRef(database, `cctv/${userID}`), newDataWIthTracker)
+        })
+
+
+    }
+
     return (
         <View>
             <Portal>
@@ -322,8 +360,7 @@ const TrackerPage = () => {
                                     <Button
                                         mode={'contained'}
                                         loading={false}
-                                        onPress={() => {
-                                        }}>Yes</Button>
+                                        onPress={handleStartTracking}>Yes</Button>
                                 </View>
                             </View>
                         </Card.Actions>
