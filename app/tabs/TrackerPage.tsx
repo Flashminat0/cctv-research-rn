@@ -268,7 +268,7 @@ const TrackerPage = () => {
 
     const handleStartTracking = () => {
         const userID = `${userEmail?.split('@')[0]}`
-        console.log('tracking started')
+        // console.log('tracking started')
 
         const cctvRef = databaseRef(database)
         get(child(cctvRef, `cctv/${userID}`)).then((snapshot) => {
