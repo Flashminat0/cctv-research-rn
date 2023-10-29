@@ -95,7 +95,6 @@ const TrackerPage = () => {
     useEffect(() => {
         if (currentJobTimestamp > 0 && userEmail.length > 0 && userEmail !== 'ERR@' && !donePhase) {
             checkForStatusChangeOnJob(currentJobTimestamp)
-
         }
     }, [currentJobTimestamp]);
 
@@ -266,6 +265,9 @@ const TrackerPage = () => {
     }, [userEmail]);
 
 
+    const [trackingMode, setTrackingMode] = useState<boolean>(false);
+
+
     const handleStartTracking = () => {
         const userID = `${userEmail?.split('@')[0]}`
         // console.log('tracking started')
@@ -280,9 +282,10 @@ const TrackerPage = () => {
             }
 
             set(databaseRef(database, `cctv/${userID}`), newDataWIthTracker)
+                .then(() => {
+                    setTrackingMode(true)
+                })
         })
-
-
     }
 
     return (
@@ -298,74 +301,81 @@ const TrackerPage = () => {
                 </Modal>
             </Portal>
             <View className={`flex flex-col justify-center items-center h-screen w-screen`}>
-                <Card className={`w-[90vw] py-1`}>
-                    <Card.Title
-                        title="Confirm Laptop"
-                        left={(props) => <Avatar.Icon {...props} icon="laptop"/>}
-                    />
-                    <Card.Content>
-                        <Text className={`text-white mb-2`}>
-                            Please confirm that this is your laptop
-                        </Text>
-                    </Card.Content>
+                {trackingMode ? <></> : <>
+                    <Card className={`w-[90vw] py-1`}>
+                        <Card.Title
+                            title="Confirm Laptop"
+                            left={(props) => <Avatar.Icon {...props} icon="laptop"/>}
+                        />
+                        <Card.Content>
+                            <Text className={`text-white mb-2`}>
+                                Please confirm that this is your laptop
+                            </Text>
+                        </Card.Content>
 
-                    <View className={`border-0 border-t-2 border-gray-400 pt-12`}>
+                        <View className={`border-0 border-t-2 border-gray-400 pt-12`}>
 
-                        <Text className={`text-white mb-2 mx-5 text-xs`}>
-                            Mobile image of laptop
-                        </Text>
-                        <View className={`mx-5 my-1 mb-4`}>
-                            <Card.Cover
-                                source={{uri: currentJobStatus?.image_of_laptop || 'https://picsum.photos/700'}}/>
-                        </View>
-                        <Text className={`text-white mb-2 mx-5 text-xs`}>
-                            CCTV image of laptop
-                        </Text>
-                        <View className={`mx-5 my-1 mb-4`}>
-                            {tracker.found ? <>
+                            <Text className={`text-white mb-2 mx-5 text-xs`}>
+                                Mobile image of laptop
+                            </Text>
+                            <View className={`mx-5 my-1 mb-4`}>
+                                {/*https://fastly.picsum.photos/id/2/5000/3333.jpg*/}
+
                                 <Card.Cover
-                                    source={{uri: tracker.cctvImageURL}}/></> : <>
-                                <Card.Cover
-                                    source={{uri: cctvImage}}/>
-                            </>}
-                            {showLoading && <View className={`px-1 pt-1`}>
-                                <Progress.Bar
-                                    color={MD2Colors.grey700}
-                                    width={320}
-                                    useNativeDriver={true}
-                                    animationConfig={{bounciness: 1}}
-                                    className={' bg-gray-300 px-2'}
-                                    indeterminate={true}
-                                    animationType={'timing'}
-                                />
-                            </View>}
+                                    source={{uri: currentJobStatus?.image_of_laptop || 'https://picsum.photos/400'}}/>
 
-                        </View>
-                    </View>
-                    <View className={`px-3`}>
-                        <Card.Actions className={`flex flex-row w-full justify-between`}>
-                            <Tooltip title="Help">
-                                <IconButton
-                                    icon="help"
-                                    iconColor={MD3Colors.error50}
-                                    size={20}
-                                    onPress={() => setShowHelp(true)}
-                                />
-                            </Tooltip>
-                            <View className={'grow flex flex-row justify-end'}>
-                                <View className={`flex flex-row space-x-2 items-center`}>
-                                    <Button
-                                        mode={'outlined'}
-                                        onPress={resetJob}>No Try Again</Button>
-                                    <Button
-                                        mode={'contained'}
-                                        loading={false}
-                                        onPress={handleStartTracking}>Yes</Button>
-                                </View>
+
                             </View>
-                        </Card.Actions>
-                    </View>
-                </Card>
+                            <Text className={`text-white mb-2 mx-5 text-xs`}>
+                                CCTV image of laptop
+                            </Text>
+                            <View className={`mx-5 my-1 mb-4`}>
+                                {tracker.found ? <>
+                                    <Card.Cover
+                                        source={{uri: tracker.cctvImageURL}}/></> : <>
+                                    <Card.Cover
+                                        source={{uri: cctvImage}}/>
+                                </>}
+                                {showLoading && <View className={`px-1 pt-1`}>
+                                    <Progress.Bar
+                                        color={MD2Colors.grey700}
+                                        width={320}
+                                        useNativeDriver={true}
+                                        animationConfig={{bounciness: 1}}
+                                        className={' bg-gray-300 px-2'}
+                                        indeterminate={true}
+                                        animationType={'timing'}
+                                    />
+                                </View>}
+
+                            </View>
+                        </View>
+                        <View className={`px-3`}>
+                            <Card.Actions className={`flex flex-row w-full justify-between`}>
+                                <Tooltip title="Help">
+                                    <IconButton
+                                        icon="help"
+                                        iconColor={MD3Colors.error50}
+                                        size={20}
+                                        onPress={() => setShowHelp(true)}
+                                    />
+                                </Tooltip>
+                                <View className={'grow flex flex-row justify-end'}>
+                                    <View className={`flex flex-row space-x-2 items-center`}>
+                                        <Button
+                                            mode={'outlined'}
+                                            onPress={resetJob}>No Try Again</Button>
+                                        <Button
+                                            mode={'contained'}
+                                            loading={false}
+                                            onPress={handleStartTracking}>Yes</Button>
+                                    </View>
+                                </View>
+                            </Card.Actions>
+                        </View>
+                    </Card>
+                </>}
+
             </View>
         </View>
     );
