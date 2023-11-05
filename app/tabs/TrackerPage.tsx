@@ -112,7 +112,7 @@ const TrackerPage = () => {
 
                 if (data) {
                     const arrayWithoutUser = data.filter((value) => value !== `${userEmail?.split('@')[0]}`)
-                    // console.log(arrayWithoutUser)
+                    console.log(arrayWithoutUser)
 
                     await set(databaseRef(database, `trackers/`), arrayWithoutUser)
                 }
@@ -143,8 +143,6 @@ const TrackerPage = () => {
             .then(() => {
                 setDonePhase(false)
             })
-
-
     }
 
     useEffect(() => {
@@ -229,7 +227,10 @@ const TrackerPage = () => {
         }
     }, [tracker, laptop, showLoading]);
 
-    const [showHelp, setShowHelp] = useState<boolean>(false);
+    const [showBindHelp, setShowBindHelp] = useState<boolean>(false);
+    const [showTrackerHelp, setShowTrackerHelp] = useState<boolean>(false);
+
+
     const containerStyle = {backgroundColor: 'white', padding: 20, margin: 20};
     //
     // const checkForChangesInTracker = () => {
@@ -288,20 +289,120 @@ const TrackerPage = () => {
         })
     }
 
+    const handleStopTracking = () => {
+        const userID = `${userEmail?.split('@')[0]}`
+        // console.log('tracking started')
+
+        const cctvRef = databaseRef(database)
+        get(child(cctvRef, `cctv/${userID}`)).then((snapshot) => {
+            const data: IBindResponse = snapshot.val()
+
+            const newDataWIthTracker = {
+                ...data,
+                status: 'ready',
+            }
+
+            set(databaseRef(database, `cctv/${userID}`), newDataWIthTracker)
+                .then(() => {
+                    setTrackingMode(false)
+                })
+        })
+    }
+
+
+    useEffect(() => {
+        const userID = `${userEmail?.split('@')[0]}`
+
+        const cctvRef = databaseRef(database)
+        get(child(cctvRef, `cctv/${userID}`)).then((snapshot) => {
+            const data: IBindResponse = snapshot.val()
+
+            if (data) {
+                if (data.status === 'tracking') {
+                    setTrackingMode(true)
+                } else {
+                    setTrackingMode(false)
+                }
+            }
+        })
+
+
+    }, [userEmail]);
+
     return (
         <View>
             <Portal>
                 <Modal
                     theme={{colors: {primary: MD3Colors.error50}}}
-                    visible={showHelp} onDismiss={() => {
-                    setShowHelp(false)
+                    visible={showBindHelp} onDismiss={() => {
+                    setShowBindHelp(false)
                 }} contentContainerStyle={containerStyle}>
                     <Text>Make sure that your laptop screen is on and the browser page should be on
                         laptop-app-cctv.vercel.app</Text>
                 </Modal>
             </Portal>
+            <Portal>
+                <Modal
+                    theme={{colors: {primary: MD3Colors.error50}}}
+                    visible={showTrackerHelp} onDismiss={() => {
+                    setShowTrackerHelp(false)
+                }} contentContainerStyle={containerStyle}>
+                    <Text>
+                        This tracker will track your laptop and will notify you when it finds your laptop. If you want
+                        to stop tracking your laptop, press the stop tracking button.
+                    </Text>
+                </Modal>
+            </Portal>
             <View className={`flex flex-col justify-center items-center h-screen w-screen`}>
-                {trackingMode ? <></> : <>
+                {trackingMode ? <>
+                    <Card className={`w-[90vw] py-1`}>
+                        <Card.Title
+                            title="Tracking Laptop"
+                            left={(props) => <Avatar.Icon {...props} icon="laptop"/>}
+                        />
+                        <Card.Content>
+                            <Text className={`text-white mb-2`}>
+                                Laptop is being tracked.
+                            </Text>
+                        </Card.Content>
+
+                        <View className={`border-0 border-t-2 border-gray-400 pt-12`}>
+                            <Text className={`text-white mb-2 mx-5 text-xs`}>
+                                CCTV image of laptop
+                            </Text>
+                            <View className={`mx-5 my-1 mb-4`}>
+                                {tracker.found ? <>
+                                    <Card.Cover
+                                        source={{uri: tracker.cctvImageURL}}/></> : <>
+                                    <Card.Cover
+                                        source={{uri: cctvImage}}/>
+                                </>}
+                            </View>
+                        </View>
+                        <View className={`px-3`}>
+                            <Card.Actions className={`flex flex-row w-full justify-between`}>
+                                <Tooltip title="Help">
+                                    <IconButton
+                                        icon="help"
+                                        iconColor={MD3Colors.error50}
+                                        size={20}
+                                        onPress={() => setShowTrackerHelp(true)}
+                                    />
+                                </Tooltip>
+                                <View className={'grow flex flex-row justify-end'}>
+                                    <View className={`flex flex-row space-x-2 items-center`}>
+                                        <Button
+                                            mode={'outlined'}
+                                            onPress={() => {
+                                                handleStopTracking()
+                                                resetJob()
+                                            }}>Stop Tracking</Button>
+                                    </View>
+                                </View>
+                            </Card.Actions>
+                        </View>
+                    </Card>
+                </> : <>
                     <Card className={`w-[90vw] py-1`}>
                         <Card.Title
                             title="Confirm Laptop"
@@ -357,7 +458,7 @@ const TrackerPage = () => {
                                         icon="help"
                                         iconColor={MD3Colors.error50}
                                         size={20}
-                                        onPress={() => setShowHelp(true)}
+                                        onPress={() => setShowBindHelp(true)}
                                     />
                                 </Tooltip>
                                 <View className={'grow flex flex-row justify-end'}>
